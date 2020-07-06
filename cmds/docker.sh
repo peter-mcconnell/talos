@@ -16,6 +16,7 @@ HOME_DIR="${HOME_DIR:-$HOME}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 
 # flags
+FLAG_help="${FLAG_help:-}"
 FLAG_tag="${FLAG_tag:-}"
 
 # help is the default entrypoint
@@ -23,6 +24,7 @@ help() {
     printf "\\033[36m%-20s\\033[0m %s\\n" "build" "docker build/docker-compose build"
     printf "\\033[36m%-20s\\033[0m %s\\n" "  --tag" "optional. image tag"
     printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "help" "display help text"
 }
 
 _volumes() {
@@ -112,9 +114,10 @@ run() {
 }
 
 if [ ! "${NOEXEC+x}" ]; then
-  if [ "${2+x}" ]; then
+  if [ "${FLAG_help}" = "" ] && [ "${2+x}" ]; then
     if [ "$2" = "build" ]; then
-      build
+      # build
+      echo " build"
     elif [ "$2" = "run" ]; then
       run
     fi
