@@ -15,10 +15,14 @@ help() {
 
 main() {
   _heading "linting ..."
+  searchpath="."
+  if [ "${1+x}" ]; then
+    searchpath="$1"
+  fi
   fail=0
   # shell / bash
   _subheading "checking for shell/bash"
-  shfiles="$(find . -type f -name "*.sh")"
+  shfiles="$(find "$searchpath" -type f -name "*.sh")"
   if [ "$shfiles" = "" ]; then
     _info "no shell/bash found. skipping"
   else
@@ -34,7 +38,7 @@ main() {
   if [ "$FAIL_FAST" = "1" ] && [ "$fail" != "0" ]; then exit "$fail"; fi
   # dockerfile
   _subheading "checking for docker"
-  dockerfiles="$(find . -type f -name "*Dockerfile")"
+  dockerfiles="$(find "$searchpath" -type f -name "*Dockerfile")"
   if [ "$dockerfiles" = "" ]; then
     _info "no Dockerfile's found. skipping"
   else
@@ -50,7 +54,7 @@ main() {
   if [ "$FAIL_FAST" = "1" ] && [ "$fail" != "0" ]; then exit "$fail"; fi
   # python
   _subheading "checking for python"
-  pyfiles="$(find . -type f -name "*.py")"
+  pyfiles="$(find "$searchpath" -type f -name "*.py")"
   if [ "$pyfiles" = "" ]; then
     _info "no python found. skipping"
   else
@@ -73,20 +77,16 @@ main() {
       fi
     done
     _info "python (radon)"
-    if find . -type f -name "*.py" | grep -q .; then
-      if command -v "radon" > /dev/null; then
-        _radon || fail=1
-      else
-        _warn "python found but radon not installed. skipping"
-      fi
+    if command -v "radon" > /dev/null; then
+      _radon "$searchpath" || fail=1
+    else
+      _warn "python found but radon not installed. skipping"
     fi
     _info "python (bandit)"
-    if find . -type f -name "*.py" | grep -q .; then
-      if command -v "bandit" > /dev/null; then
-        _bandit || fail=1
-      else
-        _warn "python found but bandit not installed. skipping"
-      fi
+    if command -v "bandit" > /dev/null; then
+      _bandit "$searchpath" || fail=1
+    else
+      _warn "python found but bandit not installed. skipping"
     fi
   fi
 
@@ -111,27 +111,17 @@ _flake8() {
   flake8 "$1"
 }
 _radon() {
-  radon cc .
+  radon cc "$1"
 }
 _bandit() {
-  bandit -r .
+  bandit -r "$1"
 }
 
 
-if [ "${2+x}" ]; then
-  cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
-  flags="$(echo "$cmd" | grep -o -e " --[^ ]*" || true)"
-  flags="$(echo "$flags" | sed -e "s/ --//g")"
-  if [ "$flags" != "" ]; then
-    for flag in $flags; do
-      echo "flag: $flag"
-      if echo "$flag" | grep -q "="; then  # flag has a value
-        echo 'flag has value'
-      else
-        echo 'flag has no value'
-      fi
-    done
+if [ "${1+x}" ]; then
+  path="."
+  if [ "${2+x}" ]; then
+    path="$2"
   fi
-else
-  main
+  main "$path"
 fi
