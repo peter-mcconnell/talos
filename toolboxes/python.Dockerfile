@@ -6,7 +6,7 @@
 ###############################################################################
 FROM debian:buster-slim AS base
 LABEL MAINTAINER "Peter McConnell <me@petermcconnell.com>"
-SHELL ["/bin/bash", "-e", "-c"]
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
@@ -84,6 +84,16 @@ RUN git clone https://github.com/bats-core/bats-core.git && \
     ./bats-core/install.sh /usr/local
 
 ###############################################################################
+## Docker
+###############################################################################
+FROM base AS docker
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    apt-key fingerprint 0EBFCD88 && \
+    echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" >> /etc/apt/sources.list.d/docker.list && \
+    apt-get update -y && \
+    apt-get install -yq --no-install-recommends docker-ce-cli
+
+###############################################################################
 ## our published image
 ###############################################################################
 FROM base AS final
@@ -96,5 +106,6 @@ COPY --from=hadolint /usr/bin/hadolint /usr/bin/hadolint
 COPY --from=tflint /usr/local/bin/tflint /usr/local/bih/tflint
 COPY --from=bats /usr/local/bin/bats /usr/local/bin/bats
 COPY --from=bats /usr/local/libexec/bats-core/bats /usr/local/libexec/bats-core/bats
+COPY --from=docker /usr/bin/docker /usr/bin/docker
 COPY . /etc/talos/
 RUN ln -sf /etc/talos/talos.sh /usr/local/bin/talos
