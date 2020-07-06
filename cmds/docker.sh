@@ -80,6 +80,7 @@ build() {
         -t="$DOCKER_TAG" \
         -f="$DOCKER_FILE" \
         "$DOCKER_CONTEXT"
+    _info "built ${DOCKER_TAG}"
   else
       >&2 echo "no $DOCKER_COMPOSE_FILE or $DOCKER_FILE found"
       exit 1
