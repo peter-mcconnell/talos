@@ -15,10 +15,13 @@ PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd)/"
 HOME_DIR="${HOME_DIR:-$HOME}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 
+# flags
+FLAG_tag=
 
 # help is the default entrypoint
 help() {
     printf "\\033[36m%-20s\\033[0m %s\\n" "build" "docker build/docker-compose build"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "  --tag" "optional. image tag"
     printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
 }
 
@@ -81,6 +84,10 @@ build() {
         -f="$DOCKER_FILE" \
         "$DOCKER_CONTEXT"
     _info "built ${DOCKER_TAG}"
+    if [ "$FLAG_tag" != "" ]; then
+      _info "tagging ${DOCKER_TAG} as ${FLAG_tag}"
+      docker tag "$DOCKER_TAG" "${FLAG_tag}"
+    fi
   else
       >&2 echo "no $DOCKER_COMPOSE_FILE or $DOCKER_FILE found"
       exit 1
@@ -106,23 +113,22 @@ run() {
 
 if [ ! "${NOEXEC+x}" ]; then
   if [ "${2+x}" ]; then
-    cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
+    cmd="$(echo "$*" | sed -e "s/[\\.]//g")"
     flags="$(echo "$cmd" | grep -o -e " --[^ ]*" || true)"
     flags="$(echo "$flags" | sed -e "s/ --//g")"
+    if [ "$flags" != "" ]; then
+      for flag in $flags; do
+        if echo "$flag" | grep -q "="; then  # flag has a value
+          eval "FLAG_$flag"
+        else
+          eval "FLAG_${flag}=True"
+        fi
+      done
+    fi
     if [ "$2" = "build" ]; then
       build
     elif [ "$2" = "run" ]; then
       run
-    fi
-    if [ "$flags" != "" ]; then
-      for flag in $flags; do
-        echo "flag: $flag"
-        if echo "$flag" | grep -q "="; then  # flag has a value
-          echo 'flag has value'
-        else
-          echo 'flag has no value'
-        fi
-      done
     fi
   else
     help
