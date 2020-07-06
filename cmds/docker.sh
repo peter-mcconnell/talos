@@ -116,8 +116,7 @@ run() {
 if [ ! "${NOEXEC+x}" ]; then
   if [ "${FLAG_help}" = "" ] && [ "${2+x}" ]; then
     if [ "$2" = "build" ]; then
-      # build
-      echo " build"
+      build
     elif [ "$2" = "run" ]; then
       run
     fi
