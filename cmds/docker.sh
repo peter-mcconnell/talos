@@ -18,8 +18,8 @@ DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 
 # help is the default entrypoint
 help() {
-    printf "\033[36m%-20s\033[0m %s\n" "build" "docker build/docker-compose build"
-    printf "\033[36m%-20s\033[0m %s\n" "run" "docker run/docker-compose up"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "build" "docker build/docker-compose build"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
 }
 
 _volumes() {
@@ -42,7 +42,7 @@ EOF
 )"
   vols=""
   for vol in $allvols; do
-    path="$(echo "$vol" | sed -e "s/^\([^:]*\).*$/\1/")"
+    path="$(echo "$vol" | sed -e "s/^\\([^:]*\\).*$/\\1/")"
     if [ -e "$path" ]; then
       vols="$vols -v $vol"
     fi
@@ -105,7 +105,7 @@ run() {
 
 if [ ! "${NOEXEC+x}" ]; then
   if [ "${2+x}" ]; then
-    cmd="$(echo "$*" | sed -e "s/[\.\/]//g")"
+    cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
     flags="$(echo "$cmd" | grep -o -e " --[^ ]*" || true)"
     flags="$(echo "$flags" | sed -e "s/ --//g")"
     if [ "$2" = "build" ]; then

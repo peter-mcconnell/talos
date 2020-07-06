@@ -8,8 +8,8 @@ FAIL_FAST="${FAIL_FAST:-0}"
 
 # help is the default entrypoint
 help() {
-    printf "\033[36m%-20s\033[0m %s\n" "build" "docker build/docker-compose build"
-    printf "\033[36m%-20s\033[0m %s\n" "run" "docker run/docker-compose up"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "build" "docker build/docker-compose build"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
 }
 
 
@@ -117,15 +117,11 @@ _bandit() {
   bandit -r .
 }
 
+
 if [ "${2+x}" ]; then
-  cmd="$(echo "$*" | sed -e "s/[\.\/]//g")"
+  cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
   flags="$(echo "$cmd" | grep -o -e " --[^ ]*" || true)"
   flags="$(echo "$flags" | sed -e "s/ --//g")"
-  if [ "$2" = "build" ]; then
-    build
-  elif [ "$2" = "run" ]; then
-    run
-  fi
   if [ "$flags" != "" ]; then
     for flag in $flags; do
       echo "flag: $flag"

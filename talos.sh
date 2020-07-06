@@ -17,7 +17,7 @@ set -eu
 TALOS_IMAGE="pemcconnell/talos:latest"
 # shellcheck disable=SC2012
 SCRIPT_PATH="$(ls -l "$0" | awk '{print $NF}')"
-TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\(.*\/\)[^\/]*$/\1/")"
+TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\\(.*\\/\\)[^\\/]*$/\\1/")"
 TALOS_DIR="$(cd "$TALOS_DIR" && pwd)/"
 SRC_DIR="${TALOS_DIR}cmds/"
 IN_DOCKER="${IN_DOCKER:-False}"
@@ -47,13 +47,13 @@ fi
 
 help() {
   echo "----------------------------------------------------------------------"
-  color="\033[36m"
+  color="\\033[36m"
   if [ "$NOCOLOR" = "True" ]; then
     color=""
   fi
-  printf "$color%-20s\033[0m %s\n" \
+  printf "$color%-20s\\033[0m %s\\n" \
     "help" "display all options"
-  printf "$color%-20s\033[0m %s\n" \
+  printf "$color%-20s\\033[0m %s\\n" \
     "info" "display talos information for current working directory"
   cmddirs="${PROJECT_ROOT}.talos/cmds/ $SRC_DIR"
   cmdcache=""
@@ -61,14 +61,14 @@ help() {
     if [ -d "$cmddir" ]; then
       # shellcheck disable=SC2044
       for file in $(find "$cmddir" -type f -name "*.sh"); do
-        name="$(echo "$file" | sed -e "s/^.*\/\([^\/]*\).sh$/\1/")"
+        name="$(echo "$file" | sed -e "s/^.*\\/\\([^\\/]*\\).sh$/\\1/")"
         if echo "$cmdcache" | grep -q "@$name@"; then
           _debug "command already found. first come first served. skipping"
           continue
         fi
         cmdcache="${cmdcache}@$name@"
         desc="$(head -n 10 "$file" | grep "# help: " | sed -e "s/^.*help: //")"
-        printf "$color%-20s\033[0m %s\n" "$name" "$desc"
+        printf "$color%-20s\\033[0m %s\\n" "$name" "$desc"
       done
     fi
   done
@@ -76,30 +76,30 @@ help() {
 
 _print() {
   if [ "$NOCOLOR" = "False" ]; then
-    printf " [ $1%-10s\033[0m] %s\n" "$2" "$3"
+    printf " [ $1%-10s\\033[0m] %s\\n" "$2" "$3"
   else
-    printf " [ %-10s] %s\n" "$2" "$3"
+    printf " [ %-10s] %s\\n" "$2" "$3"
   fi
 }
 _heading() {
-  printf " %s\n" "$1"
+  printf " %s\\n" "$1"
 }
 _subheading() {
   _heading "- $1"
 }
 _debug() {
   if [ "$DEBUG" = "True" ]; then
-    _print "\033[36m" "debug" "$1"
+    _print "\\033[36m" "debug" "$1"
   fi
 }
 _warn() {
-  >&2 _print "\033[33m" "warn" "$1"
+  >&2 _print "\\033[33m" "warn" "$1"
 }
 _info() {
-  _print "\033[32m" "info" "$1"
+  _print "\\033[32m" "info" "$1"
 }
 _error() {
-  >&2 _print "\033[31m" "error" "$1"
+  >&2 _print "\\033[31m" "error" "$1"
 }
 
 if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
@@ -110,7 +110,7 @@ else
 fi
 
 if [ "${1+x}" ]; then
-  cmd="$(echo "$1" | sed -e "s/[\.\/]//g")"
+  cmd="$(echo "$1" | sed -e "s/[\\.\\/]//g")"
   if [ "$cmd" = "help" ]; then
     help
     exit 0
