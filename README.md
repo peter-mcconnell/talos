@@ -156,6 +156,21 @@ talos lint
 lgtm
 ```
 
+command flags
+-------------
+
+You can get access to long flags (talos commmand --something --else=xx) for
+free. These are interpreted in talos.sh and eval'ed to FLAG_$name. Where a
+value is not declared, True is set. For example:
+
+```sh
+talos docker build --tag=pemcconnell/talos:latest
+# variable $FLAG_tag equals pemcconnell/talos:latest
+
+talos docker build --foo
+# variable $FLAG_foo equals True
+```
+
 core commands
 -------------
 

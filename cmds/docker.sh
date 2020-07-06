@@ -16,7 +16,7 @@ HOME_DIR="${HOME_DIR:-$HOME}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 
 # flags
-FLAG_tag=
+FLAG_tag="${FLAG_tag:-}"
 
 # help is the default entrypoint
 help() {
@@ -113,18 +113,6 @@ run() {
 
 if [ ! "${NOEXEC+x}" ]; then
   if [ "${2+x}" ]; then
-    cmd="$(echo "$*" | sed -e "s/[\\.]//g")"
-    flags="$(echo "$cmd" | grep -o -e " --[^ ]*" || true)"
-    flags="$(echo "$flags" | sed -e "s/ --//g")"
-    if [ "$flags" != "" ]; then
-      for flag in $flags; do
-        if echo "$flag" | grep -q "="; then  # flag has a value
-          eval "FLAG_$flag"
-        else
-          eval "FLAG_${flag}=True"
-        fi
-      done
-    fi
     if [ "$2" = "build" ]; then
       build
     elif [ "$2" = "run" ]; then

@@ -111,6 +111,17 @@ fi
 
 if [ "${1+x}" ]; then
   cmd="$(echo "$1" | sed -e "s/[\\.\\/]//g")"
+  flags="$(echo "$*" | grep -o -e " --[^ ]*" || true)"
+  flags="$(echo "$flags" | sed -e "s/ --//g")"
+  if [ "$flags" != "" ]; then
+    for flag in $flags; do
+      if echo "$flag" | grep -q "="; then  # flag has a value
+        eval "FLAG_$flag"
+      else
+        eval "FLAG_${flag}=True"
+      fi
+    done
+  fi
   if [ "$cmd" = "help" ]; then
     help
     exit 0
