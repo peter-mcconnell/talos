@@ -104,12 +104,6 @@ _error() {
   >&2 _print "\\033[31m" "error" "$1"
 }
 
-if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
-  _debug "loading project config"
-  . "${PROJECT_ROOT}.talos/config.sh"
-else
-  _warn "no project config found. skipping"
-fi
 
 if [ "${1+x}" ]; then
   cmd="$(echo "$1" | sed -e "s/[\\.\\/]//g")"
@@ -144,6 +138,7 @@ if [ "${1+x}" ]; then
   fi
   if [ "$cmd" = "info" ]; then
     cat <<EOF
+system: $(uname -a)
 PROJECT_ROOT=$PROJECT_ROOT
 SCRIPT_PATH=$SCRIPT_PATH
 TALOS_DIR=$TALOS_DIR
@@ -153,6 +148,12 @@ IN_DOCKER=$IN_DOCKER
 DEBUG=$DEBUG
 EOF
   else
+    if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
+      _debug "loading project config"
+      . "${PROJECT_ROOT}.talos/config.sh"
+    else
+      _warn "no project config found. skipping"
+    fi
     if [ -f "${PROJECT_ROOT}.talos/cmds/${cmd}.sh" ]; then
       _debug "loading custom command $cmd"
       . "${PROJECT_ROOT}.talos/cmds/${cmd}.sh"
