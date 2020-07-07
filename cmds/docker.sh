@@ -21,11 +21,13 @@ DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 # flags
 FLAG_help="${FLAG_help:-}"
 FLAG_tag="${FLAG_tag:-}"
+FLAG_push="${FLAG_push:-False}"
 
 # help is the default entrypoint
 help() {
     printf "\\033[36m%-20s\\033[0m %s\\n" "build" "docker build/docker-compose build"
     printf "\\033[36m%-20s\\033[0m %s\\n" "  --tag" "optional. image tag"
+    printf "\\033[36m%-20s\\033[0m %s\\n" "  --push" "optional. push after build"
     printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
     printf "\\033[36m%-20s\\033[0m %s\\n" "help" "display help text"
 }
@@ -96,6 +98,14 @@ build() {
     if [ "$FLAG_tag" != "" ]; then
       _info "tagging ${DOCKER_TAG} as ${FLAG_tag}"
       docker tag "$DOCKER_TAG" "${FLAG_tag}"
+    fi
+    if [ "$FLAG_push" = "True" ]; then
+      tag="$DOCKER_TAG"
+      if [ "$FLAG_tag" != "" ]; then
+        tag="$FLAG_tag"
+      fi
+      _info "pushing $tag"
+      docker push "$tag"
     fi
   else
       >&2 echo "no $DOCKER_COMPOSE_FILE or $DOCKER_FILE found"
