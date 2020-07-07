@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# shellcheck disable=SC1090
+# shellcheck disable=SC1090,SC2059
 ###############################################################################
 ## talos - test and run automation
 ##
@@ -15,6 +15,7 @@
 set -eu
 
 TALOS_IMAGE="pemcconnell/talos:latest"
+LOOK_FOR="${LOOK_FOR:-docker docker-compose bash bats python3 radon bandit pylint flake8 shellcheck hadolint}"
 # shellcheck disable=SC2012
 SCRIPT_PATH="$(ls -l "$0" | awk '{print $NF}')"
 TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\\(.*\\/\\)[^\\/]*$/\\1/")"
@@ -122,6 +123,12 @@ if [ "${1+x}" ]; then
     help
     exit 0
   fi
+  if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
+    _debug "loading project config"
+    . "${PROJECT_ROOT}.talos/config.sh"
+  else
+    _warn "no project config found. skipping"
+  fi
   if [ "$IGNORE_IN_DOCKER" = "False" ] && \
      [ "$cmd" != "docker" ] && \
      [ "$IN_DOCKER" = "False" ]; then
@@ -138,7 +145,9 @@ if [ "${1+x}" ]; then
   fi
   if [ "$cmd" = "info" ]; then
     cat <<EOF
-system: $(uname -a)
+vars
+-------------------------------------------------------------------------------
+TALOS_IMAGE=$TALOS_IMAGE
 PROJECT_ROOT=$PROJECT_ROOT
 SCRIPT_PATH=$SCRIPT_PATH
 TALOS_DIR=$TALOS_DIR
@@ -146,14 +155,28 @@ SRC_DIR=$SRC_DIR
 NOCOLOR=$NOCOLOR
 IN_DOCKER=$IN_DOCKER
 DEBUG=$DEBUG
+
+environment info
+-------------------------------------------------------------------------------
+whoami: $(whoami)
 EOF
-  else
-    if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
-      _debug "loading project config"
-      . "${PROJECT_ROOT}.talos/config.sh"
-    else
-      _warn "no project config found. skipping"
+    found="\\033[32m"
+    notfound="\\033[31m"
+    if [ "$NOCOLOR" = "True" ]; then
+      found=
+      notfound=
     fi
+    nc="\\033[0m"
+    for bin in $LOOK_FOR; do
+      printf "%s ..." "$bin"
+      if command -v "$bin" > /dev/null; then
+        printf " ${found}installed"
+      else
+        printf " ${notfound}not found!"
+      fi
+      printf "${nc}\\n"
+    done
+  else
     if [ -f "${PROJECT_ROOT}.talos/cmds/${cmd}.sh" ]; then
       _debug "loading custom command $cmd"
       . "${PROJECT_ROOT}.talos/cmds/${cmd}.sh"

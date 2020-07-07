@@ -21,7 +21,7 @@ DOCKER_FILE=./toolboxes/python.Dockerfile
 # DOCKER_CONTEXT=
 # DOCKER_PROGRESS=
 DOCKER_VOLUMES_EXT="$(cat <<EOF
-${TALOS_DIR}:/etc/talos:ro
+${PROJECT_ROOT}:/etc/talos:ro
 EOF
 )"
 # HOME_DIR=
