@@ -127,7 +127,7 @@ if [ "${1+x}" ]; then
     _debug "loading project config"
     . "${PROJECT_ROOT}.talos/config.sh"
   else
-    _warn "no project config found. skipping"
+    _debug "no project config found. skipping"
   fi
   if [ "$IGNORE_IN_DOCKER" = "False" ] && \
      [ "$cmd" != "docker" ] && \
