@@ -12,6 +12,9 @@ DOCKER_PROGRESS="${DOCKER_PROGRESS:-plain}"
 DOCKER_WORKSPACE="${DOCKER_WORKSPACE:-$(pwd)}"
 PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
 PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd)/"
+if [ "$PROJECT_ROOT" = "//" ]; then
+  PROJECT_ROOT="/"
+fi
 HOME_DIR="${HOME_DIR:-$HOME}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 
@@ -48,6 +51,10 @@ EOF
   vols=""
   for vol in $allvols; do
     path="$(echo "$vol" | sed -e "s/^\\([^:]*\\).*$/\\1/")"
+    if [ "$path" = "/" ]; then
+      _debug "skipping / volume mount attempt"
+      continue
+    fi
     if [ -e "$path" ]; then
       vols="$vols -v $vol"
     fi

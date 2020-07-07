@@ -30,11 +30,13 @@ if [ ! "${PROJECT_ROOT+x}" ]; then
   while true; do
     abs="$(cd "$PROJECT_ROOT" && pwd)"
     if [ "$abs" = "/" ]; then
+      PROJECT_ROOT="$(pwd)/"
       break
     fi
     if [ ! -f "${PROJECT_ROOT}.talos/config.sh" ]; then
       PROJECT_ROOT="../$PROJECT_ROOT"
     else
+      PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd)/"
       break
     fi
   done

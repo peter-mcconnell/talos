@@ -98,8 +98,8 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
 ###############################################################################
 FROM base AS final
 COPY  --from=pyenv /root/.pyenv /root/.pyenv
-ENV PYENV_ROOT=~/.pyenv
-ENV PATH=$PATH:~/.pyenv/bin/:~/.local/bin
+ENV PYENV_ROOT=/root/.pyenv
+ENV PATH=$PATH:/root/.pyenv/bin/:/root/.local/bin
 RUN printf "if command -v pyenv 1>/dev/null 2>&1; then\n  eval \"\$(pyenv init -)\"\nfi" >> ~/.bash_profile
 COPY --from=pips /root/.local/ /root/.local/
 COPY --from=hadolint /usr/bin/hadolint /usr/bin/hadolint

@@ -63,7 +63,7 @@ main() {
       if command -v "pylint" > /dev/null; then
         _pylint "$path" || fail=1
       else
-        _warn "python found but pylint not installed. skipping"
+        _warn "pylint not installed. skipping"
         break
       fi
     done
@@ -72,7 +72,7 @@ main() {
       if command -v "pylint" > /dev/null; then
         _flake8 "$path" || fail=1
       else
-        _warn "python found but flake8 not installed. skipping"
+        _warn "flake8 not installed. skipping"
         break
       fi
     done
@@ -80,13 +80,13 @@ main() {
     if command -v "radon" > /dev/null; then
       _radon "$searchpath" || fail=1
     else
-      _warn "python found but radon not installed. skipping"
+      _warn "radon not installed. skipping"
     fi
     _info "python (bandit)"
     if command -v "bandit" > /dev/null; then
       _bandit "$searchpath" || fail=1
     else
-      _warn "python found but bandit not installed. skipping"
+      _warn "bandit not installed. skipping"
     fi
   fi
 
