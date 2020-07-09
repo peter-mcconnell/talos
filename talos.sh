@@ -47,6 +47,8 @@ if [ "$DEBUG" = "True" ]; then
   set -x
 fi
 
+FLAG_user=""
+
 
 help() {
   echo "----------------------------------------------------------------------"
@@ -120,6 +122,7 @@ if [ "${1+x}" ]; then
     done
   fi
   if [ "$cmd" = "help" ]; then
+    echo '??'
     help
     exit 0
   fi
@@ -134,15 +137,23 @@ if [ "${1+x}" ]; then
      [ "$IN_DOCKER" = "False" ]; then
     export NOEXEC=1
     . "${SRC_DIR}docker.sh"
-    # shellcheck disable=SC2046
+    extargs=
+    if [ "$FLAG_user" != "" ]; then
+      extargs="-e USER=$FLAG_user"
+    fi
+    # shellcheck disable=SC2046,SC2086
+    echo 'd'
     docker run --rm \
       $(_envs) \
       $(_volumes) \
+      $extargs \
       -e IN_DOCKER=True \
       -w "$DOCKER_WORKSPACE" \
       -ti "$TALOS_IMAGE" sh -c "talos $*"
     exit 0
   fi
+  echo 'i'
+  echo "$cmd"
   if [ "$cmd" = "info" ]; then
     cat <<EOF
 vars

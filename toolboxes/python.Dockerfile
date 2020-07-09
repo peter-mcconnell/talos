@@ -21,6 +21,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
       apt-fast=1.9.9-1~ubuntu18.04.1 && \
     apt-get clean && \
     apt-fast install --no-install-recommends -yq \
+      sudo \
       python3-dev \
       python3-pip \
       python3-setuptools \
@@ -109,3 +110,4 @@ COPY --from=bats /usr/local/libexec/bats-core/bats /usr/local/libexec/bats-core/
 COPY --from=docker /usr/bin/docker /usr/bin/docker
 COPY . /etc/talos/
 RUN ln -sf /etc/talos/talos.sh /usr/local/bin/talos
+ENTRYPOINT ["/bin/sh", "/etc/talos/toolboxes/entrypoint.sh"]
