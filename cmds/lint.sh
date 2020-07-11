@@ -82,6 +82,26 @@ main() {
       _warn "bandit not installed. skipping"
     fi
   fi
+  if [ "$FAIL_FAST" = "1" ] && [ "$fail" != "0" ]; then exit "$fail"; fi
+
+  # golang
+  _subheading "checking for golang"
+  gofiles="$(find "$searchpath" -type f -name "*.go")"
+  if [ "$gofiles" = "" ]; then
+    _info "no golang found. skipping"
+  else
+    if command -v "golint" > /dev/null; then
+      _golint || fail=1
+    else
+      _warn "golang found but golint not installed. skipping"
+    fi
+    if command -v "gosec" > /dev/null; then
+      _gosec || fail=1
+    else
+      _warn "golang found but gosec not installed. skipping"
+    fi
+  fi
+
 
   exit "$fail"
 }
@@ -108,6 +128,12 @@ _radon() {
 }
 _bandit() {
   bandit -r "$1"
+}
+_golint() {
+  golint -set_exit_status ./...
+}
+_gosec() {
+  gosec ./...
 }
 
 
