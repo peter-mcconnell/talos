@@ -6,6 +6,7 @@ set -eu
 
 BATS_CMD="${BATS_CMD:-bats .}"
 PYTEST_CMD="${PYTEST_CMD:-pytest .}"
+GOTEST_CMD="${GOTEST_CMD:-go test -v ./...}"
 FAIL_FAST="${FAIL_FAST:-0}"
 
 # flags
@@ -56,6 +57,15 @@ main() {
       _warn "pytest not installed. skipping"
     fi
   fi
+  # golang
+  _subheading "checking for golang"
+  gofiles="$(find "$searchpath" -type f -name "*.go")"
+  if [ "$gofiles" = "" ]; then
+    _info "no golang found. skipping"
+  else
+    _info "go test"
+    _gotest || fail=1
+  fi
 
   exit "$fail"
 }
@@ -80,9 +90,12 @@ _pytest() {
     _info "running $PYTEST_CMD in pipenv"
     pipenv run "$PYTEST_CMD"
   else
-    _info "running $PYTEST_CMD"
     eval "$PYTEST_CMD"
   fi
+}
+_gotest() {
+  _info "running $GOTEST_CMD"
+  eval "$GOTEST_CMD"
 }
 
 
