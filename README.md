@@ -285,8 +285,4 @@ todo's
 
 - [ ] pytest example with custom ini
 - [ ] pytest reports
-- [ ] test compose build and run
-- [ ] create golang toolbox (./toolboxes/golang.Dockerfile)
-- [ ] golang test example
-- [ ] add golang linters
 - [ ] add CI
