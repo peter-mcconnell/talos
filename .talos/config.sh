@@ -17,7 +17,7 @@ hash() {
 
 # DOCKER_COMPOSE_FILE=
 DOCKER_TAG="pemcconnell/talos:$(hash "$PROJECT_ROOT")"
-DOCKER_FILE=./toolboxes/python.Dockerfile
+DOCKER_FILE=./toolboxes/mega.Dockerfile
 # DOCKER_CONTEXT=
 # DOCKER_PROGRESS=
 DOCKER_VOLUMES_EXT="$(cat <<EOF
