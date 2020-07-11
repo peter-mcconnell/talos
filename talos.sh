@@ -15,7 +15,7 @@
 set -eu
 
 TALOS_IMAGE="${TALOS_IMAGE:-pemcconnell/talos:latest}"
-LOOK_FOR="${LOOK_FOR:-docker docker-compose bash bats python3 radon bandit pylint flake8 shellcheck hadolint}"
+LOOK_FOR="${LOOK_FOR:-docker docker-compose bash bats python3 radon bandit pylint flake8 shellcheck hadolint golang golint gosec}"
 # shellcheck disable=SC2012
 SCRIPT_PATH="$(ls -l "$0" | awk '{print $NF}')"
 TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\\(.*\\/\\)[^\\/]*$/\\1/")"
