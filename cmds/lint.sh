@@ -39,7 +39,7 @@ main() {
       if command -v "hadolint" > /dev/null; then
         _hadolint "$path" || fail=1
       else
-        _warn "shell/bash found but hadolint not installed. skipping"
+        _warn "Dockerfile(s) found but hadolint not installed. skipping"
         break
       fi
     done
