@@ -93,7 +93,9 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     apt-key fingerprint 0EBFCD88 && \
     echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" >> /etc/apt/sources.list.d/docker.list && \
     apt-get update -y && \
-    apt-get install -yq --no-install-recommends docker-ce-cli
+    apt-get install -yq --no-install-recommends docker-ce-cli && \
+    curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
 
 ###############################################################################
 ## our published image
@@ -110,5 +112,6 @@ COPY --from=tflint /usr/local/bin/tflint /usr/local/bih/tflint
 COPY --from=bats /usr/local/bin/bats /usr/local/bin/bats
 COPY --from=bats /usr/local/libexec/bats-core/bats /usr/local/libexec/bats-core/bats
 COPY --from=docker /usr/bin/docker /usr/bin/docker
+COPY --from=docker /usr/local/bin/docker-compose /usr/local/bin/docker-compose
 COPY . /etc/talos/
 RUN ln -sf /etc/talos/talos.sh /usr/local/bin/talos
