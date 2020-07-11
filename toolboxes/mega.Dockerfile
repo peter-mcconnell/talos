@@ -102,7 +102,9 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
 ###############################################################################
 FROM base AS golang
 RUN curl -L https://golang.org/dl/go1.14.4.linux-amd64.tar.gz -o golang.tar.gz && \
-    tar -C /usr/local -xzf golang.tar.gz
+    tar -C /usr/local -xzf golang.tar.gz && \
+    /usr/local/go/bin/go get -u golang.org/x/lint/golint && \
+    /usr/local/go/bin/go get -u github.com/securego/gosec/cmd/gosec
 
 ###############################################################################
 ## our published image
@@ -110,7 +112,7 @@ RUN curl -L https://golang.org/dl/go1.14.4.linux-amd64.tar.gz -o golang.tar.gz &
 FROM base AS final
 COPY  --from=pyenv /root/.pyenv /root/.pyenv
 ENV PYENV_ROOT=/root/.pyenv
-ENV PATH=$PATH:/root/.pyenv/bin/:/root/.local/bin:/usr/local/go/bin/
+ENV PATH=$PATH:/root/.pyenv/bin/:/root/.local/bin:/usr/local/go/bin/:/root/go/bin
 ENV LANG=en-US
 RUN printf "if command -v pyenv 1>/dev/null 2>&1; then\n  eval \"\$(pyenv init -)\"\nfi" >> ~/.bash_profile
 COPY --from=pips /root/.local/ /root/.local/
@@ -121,5 +123,6 @@ COPY --from=bats /usr/local/libexec/bats-core/bats /usr/local/libexec/bats-core/
 COPY --from=docker /usr/bin/docker /usr/bin/docker
 COPY --from=docker /usr/local/bin/docker-compose /usr/local/bin/docker-compose
 COPY --from=golang /usr/local/go /usr/local/go
+COPY --from=golang /root/go/bin /root/go/bin
 COPY . /etc/talos/
 RUN ln -sf /etc/talos/talos.sh /usr/local/bin/talos
