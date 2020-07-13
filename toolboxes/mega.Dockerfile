@@ -89,11 +89,12 @@ RUN git clone https://github.com/bats-core/bats-core.git && \
 ## Docker
 ###############################################################################
 FROM base AS docker
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     apt-key fingerprint 0EBFCD88 && \
     echo "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" >> /etc/apt/sources.list.d/docker.list && \
     apt-get update -y && \
-    apt-get install -yq --no-install-recommends docker-ce-cli && \
+    apt-get install -yq --no-install-recommends docker-ce-cli=5:19.03.12~3-0~debian-buster && \
     curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
