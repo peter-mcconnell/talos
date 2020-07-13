@@ -47,9 +47,9 @@ project root* to place your desired customisations.
 
 ### custom configuration
 
-One of the required customisations is a `config.sh` file placed into the
-`.talos` directory of your project root. Here you can set project-specific
-configurations for your project. For example:
+One of the main ways to define customisations is with a `config.sh` file placed
+into a `.talos` directory of your project root. Here you can set
+project-specific configurations for your project. For example:
 
 `.talos/config.sh`
 ```sh
@@ -59,6 +59,7 @@ configurations for your project. For example:
 set -e
 
 
+# just some custom hash example - all of this is totally up to your needs
 hash() {
   if command -v md5 > /dev/null; then
     find "$1" -type f -and -not -path "./.git/*" -exec md5 -q {} \; | md5
@@ -88,7 +89,7 @@ given the config.sh file above it will build your project as the image
 Adding custom functions to Talos is trivial. Place a shell file into your
 projects `.talos/cmds/` directory with the filename to match the desired
 command. In that file you should place a comment starting `# help: ` under the
-shebang indicating the help text you wish to display. For examle, lets say
+shebang indicating the help text you wish to display. For example, lets say
 we wanted a "frog" function, we would add:
 
 `./.talos/cmds/frog.sh`
@@ -118,6 +119,77 @@ Now when we run `talos frog` we get to see our wonderful script in action:
 talos frog
 ribbit! ...ribbit!
 ```
+
+Now if we wanted to add some custom flags to our frog function we can add
+them to the help description with an `# flags:` section like so:
+
+```sh
+#!/usr/bin/env sh
+# help: ribbit im a frog
+# flags:
+# --jump | optional. tells our frog to jump
+# --croak | optional. tells our frog to croak
+
+if [ "$FLAG_croak" = "True" ]; then
+  echo "ribbit! ...ribbit!"
+fi
+if [ "$FLAG_jump" = "True" ]; then
+  echo "...jump!"
+fi
+```
+
+With our updated file we can make use of our new flags:
+
+```sh
+# our flags are now visible in the help section
+$ talos frog --help
+talos frog
+  --help             get all available help options
+  --jump             optional. tells our frog to jump
+  --croak            optional. tells our frog to croak
+
+# and they're ready to use
+$ talos frog --jump --croak
+ribbit! ...ribbit!
+...jump!
+```
+
+If our custom file has a main() method defined it will be executed by default
+when the command is requested. For example, with new new main() method:
+
+```sh
+#!/usr/bin/env sh
+# help: ribbit im a frog
+# flags:
+# --jump | optional. tells our frog to jump
+# --croak | optional. tells our frog to croak
+
+if [ "$FLAG_croak" = "True" ]; then
+  echo "ribbit! ...ribbit!"
+fi
+if [ "$FLAG_jump" = "True" ]; then
+  echo "...jump!"
+fi
+
+main() {
+  echo "im fired automatically"
+}
+```
+
+When we fire the previous command we now get:
+
+```sh
+$ talos frog --jump --croak
+ribbit! ...ribbit!
+...jump!
+im fired automatically
+```
+
+__note:__ all logic should be contained within the main() method - in the
+example above we handle flags outside of main(). This makes the script less
+friendly to being included from other scripts. The above was just for example
+purposes
+
 
 ### custom toolbox image
 
