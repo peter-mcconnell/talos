@@ -22,4 +22,8 @@ jobs:
           command: ./talos.sh test
       - run:
           name: Promote
-          command: ./talos.sh docker push --tag=pemcconnell/talos:latest
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$DOCKER_PASS" | docker login --username "$DOCKER_USER" --password-stdin
+              ./talos.sh docker push --tag=pemcconnell/talos:latest
+            fi
