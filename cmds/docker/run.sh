@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # help: docker run/docker-compose up
-# args:
+# flags:
 # --cmd | optional. set the command
 # --tag | optional. define which docker image:tag you wish to run
 

@@ -80,51 +80,55 @@ _error() {
 }
 
 
+flags="help=True"
+cmd=
 if [ "${1+x}" ]; then
   cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
-  flags="$(echo "$*" | grep -o -e " --[^ ]*" || true)"
-  flags="$(echo "$flags" | sed -e "s/ --//g")"
-  cmd="$(echo "$*" | sed -e "s/ --[^ ]*//g")"
-  if [ "$flags" != "" ]; then
-    for flag in $flags; do
-      if ! echo "$flag" | grep -q "="; then  # flag has a value
-        flag="${flag}=True"
-      fi
-      eval "FLAG_$flag"
-    done
-  fi
-  if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
-    _debug "loading project config"
-    . "${PROJECT_ROOT}.talos/config.sh"
-  else
-    _debug "no project config found. skipping"
-  fi
-  if [ "$IGNORE_IN_DOCKER" = "False" ] && \
-     [ "$cmd" != "docker" ] && \
-     [ "$IN_DOCKER" = "False" ]; then
-    (. "${SRC_DIR}docker/run.sh"; IN_DOCKER=True FLAG_cmd="talos $*" FLAG_tag="$TALOS_IMAGE" main)
-    exit 0
-  fi
-  cmdpath=""
-  if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/')}.sh" ]; then
-    _debug "loading custom command $cmd"
-    cmdpath="${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/').sh"
-  elif [ -f "${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh" ]; then
-    cmdpath="${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh"
-  fi
-  if [ "$cmdpath" = "" ]; then
-    _error "command not found"
-    exit 1
-  fi
-  if [ "$FLAG_help" = "True" ]; then
-    _debug "loading custom command help for $cmd"
-    help "$cmdpath" "$cmd"
-    exit 0
-  fi
-  . "$cmdpath"  # load command
-  if type main > /dev/null; then
-    main
-  fi
+  flags="$(echo "$*" | grep -o -e "--[^ ]*" || true)"
+  flags="$(echo "$flags" | sed -e "s/--//g")"
+  cmd="$(echo "$*" | sed -e "s/--[^ ]*//g" -e "s/[ ]*$//")"
+fi
+if [ "$flags" != "" ]; then
+  for flag in $flags; do
+    if ! echo "$flag" | grep -q "="; then  # flag has a value
+      flag="${flag}=True"
+    fi
+    eval "FLAG_$flag"
+  done
+fi
+if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
+  _debug "loading project config"
+  . "${PROJECT_ROOT}.talos/config.sh"
 else
-  help
+  _debug "no project config found. skipping"
+fi
+if [ "$IGNORE_IN_DOCKER" = "False" ] && \
+   [ "$cmd" != "docker" ] && \
+   [ "$IN_DOCKER" = "False" ]; then
+  (. "${SRC_DIR}docker/run.sh"; IN_DOCKER=True FLAG_cmd="talos $*" FLAG_tag="$TALOS_IMAGE" main)
+  exit 0
+fi
+cmdpath=""
+if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/')}.sh" ]; then
+  _debug "loading custom command $cmd"
+  cmdpath="${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/').sh"
+elif [ -f "${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh" ]; then
+  _debug "loading stock command"
+  cmdpath="${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh"
+fi
+if [ "$FLAG_help" = "True" ]; then
+  helppath="$cmdpath"
+  if [ "$helppath" = "" ]; then
+    helppath="$SCRIPT_PATH"
+  fi
+  help "$helppath" "$cmd"
+  exit 0
+fi
+if [ "$cmdpath" = "" ]; then
+  _error "command not found"
+  exit 1
+fi
+. "$cmdpath"  # load command
+if type main > /dev/null; then
+  main
 fi
