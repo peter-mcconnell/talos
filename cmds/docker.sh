@@ -161,7 +161,7 @@ docker_push() {
 }
 
 if [ "$FLAG_help" = "True" ]; then
-  test_help
+  docker_help
   exit 0
 fi
 if [ ! "${NOEXEC+x}" ] && [ "${2+x}" ]; then
