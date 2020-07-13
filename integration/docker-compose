@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-integration}"
+export USER_ID="$(id -u):$(getent group docker | grep -o '[0-9]\+')"
+export REVISION_HASH=$(git rev-parse --short=8 HEAD 2>/dev/null)
+export SKIP_LONG_TESTS=${SKIP_LONG_TESTS}
+
+export TEST_XML="${TEST_XML:-/tmp/junk.xml}"
+
+mkdir -p $(dirname ${TEST_XML}) .pylint.d
+touch ${TEST_XML}
+chmod 666 -R ${TEST_XML} .pylint.d
+
+docker-compose "$@"
+result=$?
+
+popd > /dev/null
+
+exit ${result}

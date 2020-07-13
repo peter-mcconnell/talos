@@ -1,0 +1,7 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/healthcheck"
+  },
+  "response": {"status": 200}
+}

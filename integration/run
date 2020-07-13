@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+
+set -e
+
+export LOGS_PATH=../build
+export DEVICES_PATH=./devices
+
+function title() {
+  echo "================================================================================"
+  echo "$@"
+  echo "--------------------------------------------------------------------------------"
+}
+
+function docker-exec() {
+  if [ -z $1 ]; then
+    echo "name or id is required"
+    return
+  fi
+  ID=$(docker ps | grep $1 | awk '{print $1}')
+  N=$(echo $ID | wc -w)
+  if [ $N -gt 1 ]; then
+    echo "multiple containers with the same id"
+    return
+  fi
+  if [ -z $ID ]; then
+    echo "container doesn't exist"
+    return
+  fi
+  docker exec -it $ID ${2:-"sh"}
+}
+
+function init() {
+  setup_devices
+  ./docker-compose run --rm init "$@"
+}
+
+function init-env() {
+  ./docker-compose run --rm init-env "$@"
+}
+
+function shell() {
+  ./docker-compose run --rm --no-deps --entrypoint bash tests-base "$@"
+}
+
+function lint() {
+  ./docker-compose run --rm --no-deps lint "$@"
+}
+
+function tests-dummy() {
+  TEST_XML=${LOGS_PATH}/dummy.xml ./docker-compose run --rm tests-dummy "$@"
+}
+
+function tests-dummys() {
+  TEST_XML=${LOGS_PATH}/dummys.xml ./docker-compose run --rm tests-dummys "$@"
+}
+
+function tests-parallel() {
+  TEST_XML=${LOGS_PATH}/tests-parallel.xml ./docker-compose run --rm tests-parallel "$@"
+}
+
+function down() {
+  ./docker-compose kill "$@"
+  ./docker-compose down "$@" || true
+}
+
+function log-dump() {
+  # Get services name from docker-compose ps,
+  # ignore the first two lines, which are the table headers,
+  # remove lines which starts with space (those are continuing the previous line)
+  # and take only the first column which is the container name
+  services="$(./docker-compose ps | tail -n +3 | grep -v -e '^\s' | awk '{print $1}')"
+
+  for service in ${services}; do
+    docker logs ${service} &>${LOGS_PATH}/${service}.log
+  done
+}
+
+function teardown() {
+  export exit_code=$1
+
+  title "Collecting logs"
+  log-dump
+
+  title "Cleaning"
+  down
+
+  exit ${exit_code}
+}
+
+function refresh() {
+  export name=$1
+
+  ./docker-compose kill ${name}
+  ./docker-compose rm -f ${name}
+  ./docker-compose up -d ${name}
+}
+
+USAGE="Usage: run ACTION [arg...]
+ACTION must be one of:
+    shell
+    init
+    exec
+    pylint
+    flake8
+    down
+    tests-dummy
+    tests-dummys
+    tests-parallel
+    refresh <name>      : destroys and rebuild a container
+"
+
+# Run the below only when running, not when sourcing
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  pushd $(dirname $0) >/dev/null
+  set -e
+
+  action=$1
+  shift
+
+  case $action in
+  shell)
+    shell "$@"
+    ;;
+  exec)
+    docker-exec "$@"
+    ;;
+  init)
+    init "$@"
+    ;;
+  init-env)
+    init-env "$@"
+    ;;
+  lint)
+    lint "$@"
+    ;;
+  tests-dummy)
+    tests-dummy "$@"
+    ;;
+  tests-dummys)
+    tests-dummys "$@"
+    ;;
+  tests-parallel)
+    tests-parallel "$@"
+    ;;
+  down)
+    down "$@"
+    ;;
+  refresh)
+    refresh "$@"
+    ;;
+  *)
+    echo "${USAGE}"
+    exit 2
+    ;;
+  esac
+
+  popd >/dev/null
+fi

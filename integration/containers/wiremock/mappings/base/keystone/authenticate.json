@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "HEAD",
+    "headers": {
+      "X-Auth-Token": {
+        "matches": "valid-token"
+      }
+    },
+    "url": "/v3/auth/tokens"
+  },
+  "response": {
+    "status": 200
+  }
+}

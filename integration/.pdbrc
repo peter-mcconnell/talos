@@ -1,0 +1,5 @@
+import rlcompleter
+pdb.Pdb.complete=rlcompleter.Completer(locals()).complete
+
+
+alias traceback from inspect import currentframe as __currentframe, stack as __stack; from traceback import format_exception_only as __format_exception_only; from traceback import print_stack as __print_stack; from pdb import Pdb as __Pdb; __pdb = [__framerec[0].f_locals.get("pdb") or __framerec[0].f_locals.get("self") for __framerec in __stack() if (__framerec[0].f_locals.get("pdb") or __framerec[0].f_locals.get("self")).__class__ == __Pdb][-1]; __print_stack(__pdb.stack[-1][0]); print "".join(__format_exception_only(*__exception__))

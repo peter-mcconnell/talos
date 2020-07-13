@@ -1,0 +1,146 @@
+version: '2.2'
+
+services:
+
+  # =====================================================================================
+  # TESTS CONTAINERS
+  # -------------------------------------------------------------------------------------
+
+  tests-parallel:
+    entrypoint: /run_parallel.sh
+    extends: tests-base
+    hostname: tests-parallel
+    depends_on:
+      wiremock0:
+        condition: service_healthy
+
+  # PLACEHOLDER SO FAR DOES NOTHING
+  init:
+    extends: tests-base
+    entrypoint: /init.sh consul.py
+    depends_on:
+      wiremock0:
+        condition: service_healthy
+      consul-thalos:
+        condition: service_healthy
+    environment:
+      THALOS_CONSUL_URL: http://consul-thalos:8500
+
+
+  # PLACEHOLDER SO FAR DOES NOTHING
+  init-env:
+    extends: tests-base
+    entrypoint: /init.sh consul.py
+    depends_on:
+      wiremock0:
+        condition: service_healthy
+      consul-thalos:
+        condition: service_healthy
+    environment:
+      THALOS_CONSUL_URL: http://consul-thalos:8500
+
+  lint:
+    extends: tests-base
+    entrypoint: /lint
+
+  tests-base:
+    build: ./
+    image: tests-base
+    user: ${USER_ID}
+    volumes:
+      - ./env:/env
+      - ./tests:/tests
+      - ./init:/init
+      - ./init.sh:/init.sh
+      - ../services:/services
+      - ./containers:/containers
+      - ./setup.cfg:/setup.cfg
+      - ./run_parallel.sh:/run_parallel.sh
+      - ./lint:/lint
+      - ./pylintrc:/etc/pylintrc:rw
+      - ./.pylint.d:/.pylint.d:rw
+      - ./docker-compose.yml:/docker-compose.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${TEST_XML}:/integration.xml:rw
+      - ./.pdbrc:/.pdbrc
+      - /etc/localtime:/etc/localtime
+    environment:
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+      REVISION_HASH: ${REVISION_HASH}
+      DELETER_MAX_ROWS: 25
+      SKIP_LONG_TESTS: ${SKIP_LONG_TESTS}
+    networks:
+      - thalos0
+
+
+
+  # =====================================================================================
+  # THALOS SERVICES
+  # -------------------------------------------------------------------------------------
+
+  iproute:
+    image: gaiadocker/iproute2
+
+  wiremock0:
+    extends: wiremock-base
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./containers/wiremock/mappings/thalos0:/mappings/thalos:ro
+    networks:
+      thalos0:
+        aliases:
+          - events-agent0
+
+  wiremock-base:
+    build: containers/wiremock
+    image: wiremock
+    volumes:
+      - ./containers/wiremock/mappings/base:/mappings/base:ro
+    healthcheck:
+      test: curl -f http://localhost/healthcheck
+
+  # =====================================================================================
+  # TESTING INFRASTRUCTURE
+  # -------------------------------------------------------------------------------------
+
+  consul-thalos:
+    extends: consul-base
+    networks:
+      thalos0:
+        aliases:
+          - consul
+
+  consul-base:
+    image: consul:0.9.2
+    entrypoint: consul
+    command: ["agent", "-server", "-bootstrap-expect=1",
+              "-advertise=127.0.0.1", "-client=0.0.0.0",
+              "-data-dir=/consul/data/", "-ui"]
+    environment:
+      CONSUL_CLIENT_INTERFACE: eth0
+    expose:
+      - 8500
+    volumes:
+      - /etc/localtime:/etc/localtime
+    healthcheck:
+      test: curl -f http://localhost:8500
+
+
+# =====================================================================================
+# NETWORKS
+# -------------------------------------------------------------------------------------
+
+networks:
+  thalos0:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/16
+          gateway: 172.16.0.1
+
+# =====================================================================================
+# VOLUMES
+# -------------------------------------------------------------------------------------
+volumes:
+  schemas:
+    external: false

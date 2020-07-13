@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v3/auth/tokens"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "X-Subject-Token": "valid-token",
+      "X-Auth-Token": "valid-token",
+      "content-type": "application/json"
+    },
+    "jsonBody": {
+    }
+  }
+}

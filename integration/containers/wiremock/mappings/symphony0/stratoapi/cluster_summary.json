@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "headers": {
+      "x-auth-user-name": {
+        "matches": "strato"
+      },
+      "x-auth-user-domain-id": {
+        "matches": "default"
+      },
+      "x-auth-roles": {
+        "matches": "admin;tenant_admin;member"
+      }
+    },
+    "url": "/api/v2/cluster/summary"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": {
+      "cluster_name": "stratocluster-0",
+      "cluster_id": "2cd466fa-1048-54c4-930e-35d739a55399",
+      "cluster_ip": "10.16.145.93",
+      "nodes": {
+        "stratot_node2.node.strato": "active",
+        "stratot_node1.node.strato": "active",
+        "stratot_node0.node.strato": "active"
+      },
+      "cluster_version": "2.1.4",
+      "cluster_global_state": "active"
+    }
+  }
+}

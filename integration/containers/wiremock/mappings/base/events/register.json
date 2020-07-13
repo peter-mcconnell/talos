@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/v2/events/register"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+    }
+  }
+}
