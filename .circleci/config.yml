@@ -1,0 +1,25 @@
+---
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Build docker image
+          command: ./talos.sh docker build
+      - run:
+          name: Run linters
+          command: ./talos.sh lint --nofail
+      - run:
+          name: Run tests
+          command: ./talos.sh test
+      - run:
+          name: Promote
+          command: ./talos.sh docker push
