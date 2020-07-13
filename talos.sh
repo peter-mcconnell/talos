@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# shellcheck disable=SC1090,SC2059
+# shellcheck disable=SC1090
 ###############################################################################
 ## talos - test and run automation
 ##
@@ -11,11 +11,10 @@
 ## - docker dependent
 ## - opinionated but extendable
 ###############################################################################
-
+# help: build, test and run automation tool
 set -eu
 
 TALOS_IMAGE="${TALOS_IMAGE:-pemcconnell/talos:latest}"
-LOOK_FOR="${LOOK_FOR:-docker docker-compose bash bats python3 radon bandit pylint flake8 shellcheck hadolint golang golint gosec}"
 # shellcheck disable=SC2012
 SCRIPT_PATH="$(ls -l "$0" | awk '{print $NF}')"
 TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\\(.*\\/\\)[^\\/]*$/\\1/")"
@@ -47,36 +46,10 @@ if [ "$DEBUG" = "x" ]; then
   set -x
 fi
 
-FLAG_help="${FLAG_help:-False}"
+# shellcheck disable=SC1091
+. "${TALOS_DIR}libs/help.sh"  # help() function
 
-help() {
-  echo "----------------------------------------------------------------------"
-  color="\\033[36m"
-  if [ "$NOCOLOR" = "True" ]; then
-    color=""
-  fi
-  printf "$color%-20s\\033[0m %s\\n" \
-    "help" "display all options"
-  printf "$color%-20s\\033[0m %s\\n" \
-    "info" "display talos information for current working directory"
-  cmddirs="${PROJECT_ROOT}.talos/cmds/ $SRC_DIR"
-  cmdcache=""
-  for cmddir in $cmddirs; do
-    if [ -d "$cmddir" ]; then
-      # shellcheck disable=SC2044
-      for file in $(find "$cmddir" -type f -name "*.sh"); do
-        name="$(echo "$file" | sed -e "s/^.*\\/\\([^\\/]*\\).sh$/\\1/")"
-        if echo "$cmdcache" | grep -q "@$name@"; then
-          _debug "command already found. first come first served. skipping"
-          continue
-        fi
-        cmdcache="${cmdcache}@$name@"
-        desc="$(head -n 10 "$file" | grep "# help: " | sed -e "s/^.*help: //")"
-        printf "$color%-20s\\033[0m %s\\n" "$name" "$desc"
-      done
-    fi
-  done
-}
+FLAG_help="${FLAG_help:-False}"
 
 _print() {
   if [ "$NOCOLOR" = "False" ]; then
@@ -108,9 +81,10 @@ _error() {
 
 
 if [ "${1+x}" ]; then
-  cmd="$(echo "$1" | sed -e "s/[\\.\\/]//g")"
+  cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
   flags="$(echo "$*" | grep -o -e " --[^ ]*" || true)"
   flags="$(echo "$flags" | sed -e "s/ --//g")"
+  cmd="$(echo "$*" | sed -e "s/ --[^ ]*//g")"
   if [ "$flags" != "" ]; then
     for flag in $flags; do
       if ! echo "$flag" | grep -q "="; then  # flag has a value
@@ -118,10 +92,6 @@ if [ "${1+x}" ]; then
       fi
       eval "FLAG_$flag"
     done
-  fi
-  if [ "$cmd" = "help" ]; then
-    help
-    exit 0
   fi
   if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
     _debug "loading project config"
@@ -131,58 +101,29 @@ if [ "${1+x}" ]; then
   fi
   if [ "$IGNORE_IN_DOCKER" = "False" ] && \
      [ "$cmd" != "docker" ] && \
-     [ "$FLAG_help" = "False" ] && \
      [ "$IN_DOCKER" = "False" ]; then
-    export NOEXEC=1
-    . "${SRC_DIR}docker.sh"
-    IN_DOCKER=True docker_run "talos $*" "$TALOS_IMAGE"
+    (. "${SRC_DIR}docker/run.sh"; IN_DOCKER=True FLAG_cmd="talos $*" FLAG_tag="$TALOS_IMAGE" main)
     exit 0
   fi
-  if [ "$cmd" = "info" ]; then
-    cat <<EOF
-vars
--------------------------------------------------------------------------------
-TALOS_IMAGE=$TALOS_IMAGE
-PROJECT_ROOT=$PROJECT_ROOT
-SCRIPT_PATH=$SCRIPT_PATH
-TALOS_DIR=$TALOS_DIR
-SRC_DIR=$SRC_DIR
-NOCOLOR=$NOCOLOR
-IN_DOCKER=$IN_DOCKER
-DEBUG=$DEBUG
-
-environment info
--------------------------------------------------------------------------------
-whoami: $(whoami)
-EOF
-    found="\\033[32m"
-    notfound="\\033[31m"
-    if [ "$NOCOLOR" = "True" ]; then
-      found=
-      notfound=
-    fi
-    nc="\\033[0m"
-    for bin in $LOOK_FOR; do
-      printf "%s ..." "$bin"
-      if command -v "$bin" > /dev/null; then
-        printf " ${found}installed"
-      else
-        printf " ${notfound}not found!"
-      fi
-      printf "${nc}\\n"
-    done
-  else
-    if [ -f "${PROJECT_ROOT}.talos/cmds/${cmd}.sh" ]; then
-      _debug "loading custom command $cmd"
-      . "${PROJECT_ROOT}.talos/cmds/${cmd}.sh"
-    else
-      if [ -f "${SRC_DIR}${cmd}.sh" ]; then
-        . "${SRC_DIR}${cmd}.sh"
-      else
-        _error "command not found"
-        exit 1
-      fi
-    fi
+  cmdpath=""
+  if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/')}.sh" ]; then
+    _debug "loading custom command $cmd"
+    cmdpath="${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/').sh"
+  elif [ -f "${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh" ]; then
+    cmdpath="${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh"
+  fi
+  if [ "$cmdpath" = "" ]; then
+    _error "command not found"
+    exit 1
+  fi
+  if [ "$FLAG_help" = "True" ]; then
+    _debug "loading custom command help for $cmd"
+    help "$cmdpath" "$cmd"
+    exit 0
+  fi
+  . "$cmdpath"  # load command
+  if type main > /dev/null; then
+    main
   fi
 else
   help

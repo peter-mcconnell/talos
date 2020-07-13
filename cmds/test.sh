@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 # help: run all available testers
+# flags:
+# --pipenv | use pipenv for the tests
+# --pipenvdev | use pipenv --dev for the tests
 
 set -eu
 
@@ -13,13 +16,6 @@ FAIL_FAST="${FAIL_FAST:-0}"
 FLAG_help="${FLAG_help:-False}"
 FLAG_pipenv="${FLAG_pipenv:-False}"
 FLAG_pipenvdev="${FLAG_pipenvdev:-False}"
-
-test_help() {
-  printf "\\033[36m%-20s\\033[0m %s\\n" "talos test" ""
-  printf "\\033[36m%-20s\\033[0m %s\\n" "  --pipenv" "optional. wrap tests in pipenv"
-  printf "\\033[36m%-20s\\033[0m %s\\n" "  --pipenvdev" "optional. wrap tests in pipenv (using pipenv install --dev)"
-  printf "\\033[36m%-20s\\033[0m %s\\n" "help" "display help text"
-}
 
 main() {
   _heading "testing ..."
@@ -97,21 +93,3 @@ _gotest() {
   _info "running $GOTEST_CMD"
   eval "$GOTEST_CMD"
 }
-
-
-if [ "$FLAG_help" = "True" ]; then
-  test_help
-  exit 0
-fi
-if [ "${1+x}" ]; then
-  path="."
-  if [ "${2+x}" ] && ! echo "$2" | grep -q "^--"; then
-    if [ -e "$2" ]; then
-      path="$2"
-    else
-      _error "'$2' not found"
-      exit 1
-    fi
-  fi
-  main "$path"
-fi

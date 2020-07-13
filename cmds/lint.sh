@@ -1,28 +1,24 @@
 #!/usr/bin/env sh
-# help: run all available linters
+# help: run all linters against the workspace
+# flags:
+# --path | only lint the given path
 
 set -eu
-
 
 FAIL_FAST="${FAIL_FAST:-0}"
 FLAG_nofail="${FLAG_nofail:-False}"
 FLAG_failfast="${FLAG_failfast:-False}"
+FLAG_path="${FLAG_path:-False}"
 
 if [ "$FLAG_failfast" = "True" ]; then
   FAIL_FAST=1
 fi
 
-# help is the default entrypoint
-lint_help() {
-  printf "\\033[36m%-20s\\033[0m %s\\n" "  --nofail" "optional. ignore failures (no exit code)"
-  printf "\\033[36m%-20s\\033[0m %s\\n" "  --failfast" "optional. exit on first error"
-}
-
 main() {
   _heading "linting ..."
   searchpath="."
-  if [ "${1+x}" ]; then
-    searchpath="$1"
+  if [ "$FLAG_path" != "False" ]; then
+    searchpath="$FLAG_path"
   fi
   fail=0
   # shell / bash
@@ -149,15 +145,3 @@ _golint() {
 _gosec() {
   gosec ./...
 }
-
-
-if [ "$FLAG_help" = "True" ]; then
-  lint_help
-  exit 0
-fi
-
-path="."
-if [ "${2+x}" ] && ! echo "$2" | grep -q "^--" ; then
-  path="$2"
-fi
-main "$path"
