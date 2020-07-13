@@ -21,7 +21,7 @@ help() {
   if [ "$cmd" != "" ]; then
     prefix="$prefix $cmd"
   fi
-  echo "${color}${prefix}\e[0m"
+  echo "${color}${prefix}\\e[0m"
   printf "$color%-20s\\033[0m %s\\n" \
     "  --help" \
     "get all available help options"
@@ -33,8 +33,8 @@ help() {
           break
         fi
         printf "$color%-20s\\033[0m %s\\n" \
-          "  $(echo "$line" | sed -e "s/^# \([^ ]*\).*$/\1/")" \
-          "$(echo "$line" | sed -e "s/^.* | \(.*\)$/\1/")"
+          "  $(echo "$line" | sed -e "s/^# \\([^ ]*\\).*$/\\1/")" \
+          "$(echo "$line" | sed -e "s/^.* | \\(.*\\)$/\\1/")"
       elif echo "$line" | grep -q "^# flags:"; then
         recording="1"
       fi
@@ -44,7 +44,7 @@ help() {
   # subcommands
   dir="$SRC_DIR"
   if [ "$cmd" != "" ]; then
-    dir="$(echo "$path" | sed -e "s/^\(.*\/\)[^\/]*$/\1/")"
+    dir="$(echo "$path" | sed -e "s/^\\(.*\\/\\)[^\\/]*$/\\1/")"
   fi
   if [ "$cmd" != "" ]; then
     if [ -d "${dir}$(echo "$cmd" | tr ' ' '/')" ]; then
