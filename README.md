@@ -1,6 +1,8 @@
 talos
 =====
 
+[![CircleCI](https://circleci.com/gh/pemcconnell/talos/tree/master.svg?style=svg)](https://circleci.com/gh/pemcconnell/talos/tree/master)
+
 build, test and run framework
 
 The mission of this tool is to provide a widely compatable script which can
@@ -285,4 +287,3 @@ todo's
 
 - [ ] pytest example with custom ini
 - [ ] pytest reports
-- [ ] add CI
