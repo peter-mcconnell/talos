@@ -13,7 +13,7 @@ jobs:
             - /caches/app.tar
       - run:
           name: Build docker image
-          command: ./talos.sh docker build
+          command: ./talos.sh docker build --tag=pemcconnell/talos:latest
       - run:
           name: Run linters
           command: ./talos.sh lint --nofail
@@ -22,4 +22,4 @@ jobs:
           command: ./talos.sh test
       - run:
           name: Promote
-          command: ./talos.sh docker push
+          command: ./talos.sh docker push --tag=pemcconnell/talos:latest
