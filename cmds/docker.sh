@@ -33,6 +33,8 @@ docker_help() {
   printf "\\033[36m%-20s\\033[0m %s\\n" "  --tag" "optional. image tag"
   printf "\\033[36m%-20s\\033[0m %s\\n" "  --push" "optional. push after build"
   printf "\\033[36m%-20s\\033[0m %s\\n" "run" "docker run/docker-compose up"
+  printf "\\033[36m%-20s\\033[0m %s\\n" "push" "docker push"
+  printf "\\033[36m%-20s\\033[0m %s\\n" "  --tag" "optional. image tag"
   printf "\\033[36m%-20s\\033[0m %s\\n" "help" "display help text"
 }
 
@@ -149,6 +151,15 @@ docker_run() {
   fi
 }
 
+docker_push() {
+  _debug "pushing ..."
+  tag="$DOCKER_TAG"
+  if [ "$FLAG_tag" != "" ]; then
+    tag="$FLAG_tag"
+  fi
+  docker push  "$tag"
+}
+
 if [ "$FLAG_help" = "True" ]; then
   test_help
   exit 0
@@ -158,5 +169,7 @@ if [ ! "${NOEXEC+x}" ] && [ "${2+x}" ]; then
     docker_build
   elif [ "$2" = "run" ]; then
     docker_run ""
+  elif [ "$2" = "push" ]; then
+    docker_push
   fi
 fi
