@@ -281,9 +281,3 @@ Once the image has been built you can run the container using `talos docker run`
  [ info      ] running docker run --rm  -e DISPLAY=unix/private/tmp/com.apple.launchd.WJTehPPKq2/org.macosforge.xquartz:0 -e HOST_HOME=/Users/someguy -ti talos:05b8266beeaaf11979f6ef888ad40db5
 root@de84379554b6:/#
 ```
-
-todo's
-------
-
-- [ ] pytest example with custom ini
-- [ ] pytest reports
