@@ -24,6 +24,7 @@ fi
 HOME_DIR="${HOME_DIR:-$HOME}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 PYTHONPATH="${PYTHONPATH:-.}"
+EXT_FLAGS="${EXT_FLAGS:-}"
 
 # flags
 FLAG_cmd="${FLAG_cmd:-}"
@@ -84,6 +85,8 @@ EOF
 
 main() {
   _debug "running ..."
+  extflags="$(echo "$1" | grep -o " -[a-z]\+ \+[^ ]\+")"
+  extflags="$EXT_FLAGS $extflags"
   cmd="$DOCKER_CMD"
   if [ "$FLAG_cmd" != "" ]; then
     cmd="$FLAG_cmd"
@@ -99,6 +102,7 @@ main() {
       $(_envs) \
       $(_volumes) \
       -w "$DOCKER_WORKSPACE" \
+      $extflags \
       -ti "$image" $cmd
   elif [ -f "$DOCKER_COMPOSE_FILE" ]; then
     _debug "found docker-compose file. running ..."

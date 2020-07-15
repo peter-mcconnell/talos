@@ -102,11 +102,14 @@ if [ -f "${PROJECT_ROOT}.talos/config.sh" ]; then
 else
   _debug "no project config found. skipping"
 fi
-if [ "$IGNORE_IN_DOCKER" = "False" ] && \
-   [ "$cmd" != "docker" ] && \
-   [ "$IN_DOCKER" = "False" ]; then
-  (. "${SRC_DIR}docker/run.sh"; IN_DOCKER=True FLAG_cmd="talos $*" FLAG_tag="$TALOS_IMAGE" main)
-  exit 0
+
+if ! echo "$cmd" | grep -q "^[ ]*docker"; then
+  if [ "$IGNORE_IN_DOCKER" = "False" ] && \
+     [ "$IN_DOCKER" = "False" ]; then
+    _debug "redirecting $cmd request to docker"
+    (. "${SRC_DIR}docker/run.sh"; IN_DOCKER=True FLAG_cmd="talos $*" FLAG_tag="$TALOS_IMAGE" main "$*")
+    exit 0
+  fi
 fi
 cmdpath=""
 if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/')}.sh" ]; then
