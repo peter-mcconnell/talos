@@ -22,6 +22,7 @@ if [ "$PROJECT_ROOT" = "//" ]; then
   PROJECT_ROOT="/"
 fi
 HOME_DIR="${HOME_DIR:-$HOME}"
+DISPLAY="${DISPLAY:-}"
 DOCKER_VOLUMES_EXT="${DOCKER_VOLUMES_EXT:-}"
 PYTHONPATH="${PYTHONPATH:-.}"
 EXT_FLAGS="${EXT_FLAGS:-}"
@@ -65,7 +66,7 @@ EOF
 _envs() {
   # helper method to build a string containing environment variables
   allenvs="$(cat <<EOF
-DISPLAY=unix$DISPLAY
+DISPLAY=$DISPLAY
 HOST_HOME=$HOME_DIR
 PROJECT_ROOT=$PROJECT_ROOT
 PYTHONPATH=$PYTHONPATH
@@ -85,8 +86,10 @@ EOF
 
 main() {
   _debug "running ..."
-  extflags="$(echo "$1" | grep -o " -[a-z]\+ \+[^ ]\+")"
-  extflags="$EXT_FLAGS $extflags"
+  extflags="$EXT_FLAGS"
+  if [ "${1+x}" ]; then
+    extflags="$extflags $(echo "$1" | grep -o " -[a-z]\+ \+[^ ]\+" || true)"
+  fi
   cmd="$DOCKER_CMD"
   if [ "$FLAG_cmd" != "" ]; then
     cmd="$FLAG_cmd"
