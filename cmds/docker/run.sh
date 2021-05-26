@@ -9,6 +9,7 @@ set -eu
 
 TALOS_IMAGE="${TALOS_IMAGE:-pemcconnell/talos:latest}"
 DOCKER_COMPOSE_FILE="${DOCKER_COMPOSE_FILE:-./docker-compose.yml}"
+DOCKER_COMPOSE_FILES="${DOCKER_COMPOSE_FILES:-}"
 DOCKER_TAG="${DOCKER_TAG:-${TALOS_IMAGE}}"
 DOCKER_CMD="${DOCKER_CMD:-}"
 DOCKER_FILE="${DOCKER_FILE:-./Dockerfile}"
@@ -107,6 +108,20 @@ main() {
       -w "$DOCKER_WORKSPACE" \
       $extflags \
       -ti "$image" $cmd
+  elif [ "$DOCKER_COMPOSE_FILES" != "" ]; then
+    _debug "requesting docker-compose files '$DOCKER_COMPOSE_FILES'. running ..."
+    # shellcheck disable=SC2046
+    _cmd="docker-compose "
+    _oifs=$IFS; IFS=' '; for file in $DOCKER_COMPOSE_FILES; do
+      if [ ! -f "$file" ]; then
+        _error "$file not found"
+        exit 1
+      fi
+      _cmd="$_cmd -f $file"
+    done; IFS=$_oifs
+    _cmd="$_cmd up -d"
+    _debug "running $_cmd"
+    eval "$_cmd"
   elif [ -f "$DOCKER_COMPOSE_FILE" ]; then
     _debug "found docker-compose file. running ..."
     # shellcheck disable=SC2046

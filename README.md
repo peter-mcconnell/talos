@@ -356,3 +356,17 @@ Once the image has been built you can run the container using `talos docker run`
  [ debug     ] running docker run --rm  -e DISPLAY=:0 -e HOST_HOME=/Users/pete -e PROJECT_ROOT=/Users/pete/go/src/github.com/someproject/ -e PYTHONPATH=. -e DEBUG=1 -e IN_DOCKER=False  -v /var/run/docker.sock:/var/run/docker.sock -v /Users/pete/go/src/github.com/someproject/:/Users/pete/go/src/github.com/someproject/ -v /tmp/.X11-unix:/tmp/.X11-unix -v /Users/pete/.aws:/Users/pete/.aws:ro -v /Users/pete/.docker:/Users/pete/.docker:ro -v /Users/pete/.ssh:/Users/pete/.ssh:ro -w /Users/pete/go/src/github.com/someproject -ti pemcconnell/talos:latest
 root@de84379554b6:/#
 ```
+
+### docker-compose
+
+The `talos docker build` and `talos docker run` will both attempt to autodetect docker-compose. By default this checks for `docker-compose.yml`. In the event that you have a different filename, you can tell talos where to find the compose file by adding the following to your projects `./.talos/config.sh`:
+
+```sh
+DOCKER_COMPOSE_FILE="./mycustomdockercomposefilename.yml"
+```
+
+In the event that you have multiple docker-compose files, you can tell talos where to find these with:
+
+```sh
+DOCKER_COMPOSE_FILES="./services.yml ./backend.yml ./frontend.yml"
+```

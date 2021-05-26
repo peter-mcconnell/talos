@@ -9,6 +9,7 @@ set -eu
 
 TALOS_IMAGE="${TALOS_IMAGE:-pemcconnell/talos:latest}"
 DOCKER_COMPOSE_FILE="${DOCKER_COMPOSE_FILE:-./docker-compose.yml}"
+DOCKER_COMPOSE_FILES="${DOCKER_COMPOSE_FILES:-}"
 DOCKER_TAG="${DOCKER_TAG:-${TALOS_IMAGE}}"
 DOCKER_FILE="${DOCKER_FILE:-./Dockerfile}"
 DOCKER_CONTEXT="${DOCKER_CONTEXT:-.}"
@@ -21,7 +22,20 @@ FLAG_push="${FLAG_push:-False}"
 
 main() {
   _debug "building ..."
-  if [ -f "$DOCKER_COMPOSE_FILE" ]; then
+  if [ "$DOCKER_COMPOSE_FILES" != "" ]; then
+    _debug "requesting docker-compose files '$DOCKER_COMPOSE_FILES'. building docker-compose ..."
+    _cmd="docker-compose "
+    _oifs=$IFS; IFS=' '; for file in $DOCKER_COMPOSE_FILES; do
+      if [ ! -f "$file" ]; then
+        _error "$file not found"
+        exit 1
+      fi
+      _cmd="$_cmd -f $file"
+    done; IFS=$_oifs
+    _cmd="$_cmd build --pull"
+    _debug "building $_cmd"
+    eval "$_cmd"
+  elif [ -f "$DOCKER_COMPOSE_FILE" ]; then
       _debug "found $DOCKER_COMPOSE_FILE. building docker-compose ..."
       docker-compose -f "$DOCKER_COMPOSE_FILE" build
   elif [ -f "$DOCKER_FILE" ]; then
