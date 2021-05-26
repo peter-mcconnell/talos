@@ -8,17 +8,18 @@ FROM debian:buster-slim AS base
 LABEL MAINTAINER "Peter McConnell <me@petermcconnell.com>"
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
+# hadolint ignore=DL3008
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -y && \
     apt-get install --no-install-recommends -yq \
-      ca-certificates=20200601~deb10u1 \
-      gnupg2=2.2.12-1+deb10u1 && \
+      ca-certificates \
+      gnupg2 && \
     echo deb http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main >> /etc/apt/sources.list.d/apt-fast.list && \
     echo deb-src http://ppa.launchpad.net/apt-fast/stable/ubuntu bionic main >> /etc/apt/sources.list.d/apt-fast.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A2166B8DE8BDC3367D1901C11EE2FF37CA8DA16B && \
     apt-get update -y && \
     apt-get install --no-install-recommends -yq \
-      apt-fast=1.9.9-1~ubuntu18.04.1 && \
+      apt-fast && \
     apt-get clean && \
     apt-fast install --no-install-recommends -yq \
       build-essential \

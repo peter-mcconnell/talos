@@ -19,6 +19,7 @@ TALOS_IMAGE="${TALOS_IMAGE:-pemcconnell/talos:latest}"
 SCRIPT_PATH="$(ls -l "$0" | awk '{print $NF}')"
 TALOS_DIR="$(echo "$SCRIPT_PATH" | sed -e "s/\\(.*\\/\\)[^\\/]*$/\\1/")"
 TALOS_DIR="$(cd "$TALOS_DIR" && pwd)/"
+export TALOS_DIR
 SRC_DIR="${TALOS_DIR}cmds/"
 IN_DOCKER="${IN_DOCKER:-False}"
 IGNORE_IN_DOCKER="${IGNORE_IN_DOCKER:-False}"
@@ -83,7 +84,6 @@ _error() {
 flags="help=True"
 cmd=
 if [ "${1+x}" ]; then
-  cmd="$(echo "$*" | sed -e "s/[\\.\\/]//g")"
   flags="$(echo "$*" | grep -o -e "--[^ ]*" || true)"
   flags="$(echo "$flags" | sed -e "s/--//g")"
   cmd="$(echo "$*" | sed -e "s/--[^ ]*//g" -e "s/[ ]*$//")"
@@ -112,7 +112,7 @@ if ! echo "$cmd" | grep -q "^[ ]*docker"; then
   fi
 fi
 cmdpath=""
-if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/')}.sh" ]; then
+if [ -f "${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/').sh" ]; then
   _debug "loading custom command $cmd"
   cmdpath="${PROJECT_ROOT}.talos/cmds/$(echo "$cmd" | tr ' ' '/').sh"
 elif [ -f "${SRC_DIR}$(echo "$cmd" | tr ' ' '/').sh" ]; then

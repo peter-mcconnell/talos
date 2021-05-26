@@ -130,10 +130,10 @@ them to the help description with an `# flags:` section like so:
 # --jump | optional. tells our frog to jump
 # --croak | optional. tells our frog to croak
 
-if [ "$FLAG_croak" = "True" ]; then
+if [ "${FLAG_croak:-}" = "True" ]; then
   echo "ribbit! ...ribbit!"
 fi
-if [ "$FLAG_jump" = "True" ]; then
+if [ "${FLAG_jump:-}" = "True" ]; then
   echo "...jump!"
 fi
 ```
@@ -164,10 +164,10 @@ when the command is requested. For example, with new new main() method:
 # --jump | optional. tells our frog to jump
 # --croak | optional. tells our frog to croak
 
-if [ "$FLAG_croak" = "True" ]; then
+if [ "${FLAG_croak:-}" = "True" ]; then
   echo "ribbit! ...ribbit!"
 fi
-if [ "$FLAG_jump" = "True" ]; then
+if [ "${FLAG_jump:-}" = "True" ]; then
   echo "...jump!"
 fi
 
@@ -346,10 +346,13 @@ To build with docker you can run `talos docker build`. This will attempt to auto
 
 ### docker run
 
-Once the image has been built you can run the container using `talos docker run`. This will automatically mount in a series of common volumes. For convenience this generated 'docker run' command is pasted prior to running the container so you can easily copy/paste it and tweak as required:
+Once the image has been built you can run the container using `talos docker run`. This will automatically mount in a series of common volumes. If you would like to see this generated 'docker run' command is pasted prior to running the container so you can easily copy/paste it and tweak as required. To view it enable debug logs with DEBUG=1:
 
 ```sh
- talos docker run
- [ info      ] running docker run --rm  -e DISPLAY=unix/private/tmp/com.apple.launchd.WJTehPPKq2/org.macosforge.xquartz:0 -e HOST_HOME=/Users/someguy -ti talos:05b8266beeaaf11979f6ef888ad40db5
+ DEBUG=1 talos docker run
+ [ debug     ] no project config found. skipping
+ [ debug     ] loading stock command
+ [ debug     ] running ...
+ [ debug     ] running docker run --rm  -e DISPLAY=:0 -e HOST_HOME=/Users/pete -e PROJECT_ROOT=/Users/pete/go/src/github.com/someproject/ -e PYTHONPATH=. -e DEBUG=1 -e IN_DOCKER=False  -v /var/run/docker.sock:/var/run/docker.sock -v /Users/pete/go/src/github.com/someproject/:/Users/pete/go/src/github.com/someproject/ -v /tmp/.X11-unix:/tmp/.X11-unix -v /Users/pete/.aws:/Users/pete/.aws:ro -v /Users/pete/.docker:/Users/pete/.docker:ro -v /Users/pete/.ssh:/Users/pete/.ssh:ro -w /Users/pete/go/src/github.com/someproject -ti pemcconnell/talos:latest
 root@de84379554b6:/#
 ```

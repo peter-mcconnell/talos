@@ -21,7 +21,7 @@ help() {
   if [ "$cmd" != "" ]; then
     prefix="$prefix $cmd"
   fi
-  echo "${color}${prefix}\\e[0m"
+  printf "%b%s\\e[0m\\n" "$color" "$prefix"
   printf "$color%-20s\\033[0m %s\\n" \
     "  --help" \
     "get all available help options"
@@ -53,7 +53,7 @@ help() {
       return 0  # no sub-commands for the $cmd
     fi
   fi
-  cmddirs="${PROJECT_ROOT}.talos/cmds/ $dir"
+  cmddirs="${PROJECT_ROOT}.talos/cmds/$cmd $dir"
   cmdcache=""
   for cmddir in $cmddirs; do
     if [ -d "$cmddir" ]; then

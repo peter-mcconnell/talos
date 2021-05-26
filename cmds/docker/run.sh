@@ -88,7 +88,7 @@ main() {
   _debug "running ..."
   extflags="$EXT_FLAGS"
   if [ "${1+x}" ]; then
-    extflags="$extflags $(echo "$1" | grep -o " -[a-z]\+ \+[^ ]\+" || true)"
+    extflags="$extflags $(echo "$1" | grep -o " -[a-z]+ +[^ ]+" || true)"
   fi
   cmd="$DOCKER_CMD"
   if [ "$FLAG_cmd" != "" ]; then
@@ -96,7 +96,7 @@ main() {
   fi
   if [ "$FLAG_tag" != "" ] || [ -f "$DOCKER_FILE" ]; then
     image="$DOCKER_TAG"
-    if [ "$FLAG_tag" != "" ]; then
+    if [ "$FLAG_tag" != "" ] && [ "$FLAG_tag" != "True" ]; then
       image="$FLAG_tag"
     fi
     _debug "running docker run --rm $(_envs) $(_volumes) -w $DOCKER_WORKSPACE -ti $image $cmd"
